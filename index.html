@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Home Assistant</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f0f2f5;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    h1 {
+      margin: 20px 0;
+      color: #2c3e50;
+    }
+
+    /* 🌙 Dark Theme */
+    body.dark {
+      background-color: #121212;
+      color: #f5f5f5;
+    }
+
+    body.dark h1,
+    body.dark h3,
+    body.dark p,
+    body.dark span {
+      color: #ffffff;
+    }
+
+    body.dark .device-container,
+    body.dark .voice-container,
+    body.dark .sensor-container {
+      background: #1e1e1e;
+      border: 1px solid #333;
+    }
+
+    body.dark .device-card {
+      background-color: #2a2a2a;
+      border: 1px solid #444;
+    }
+
+    body.dark .toggle-btn {
+      background-color: #4caf50;
+    }
+
+    body.dark .toggle-btn:hover {
+      background-color: #45a049;
+    }
+
+    body.dark .voice-btn {
+      background-color: #0066cc;
+    }
+
+    body.dark .voice-btn:hover {
+      background-color: #004c99;
+    }
+
+    body.dark #emergency-card {
+      background: #1e1e1e;
+      color: #f5f5f5;
+      border: 1px solid #333;
+    }
+
+    /* 🌓 Theme Toggle Button */
+    #theme-toggle {
+      position: fixed;
+      top: 15px;
+      right: 20px;
+      background: #333;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      z-index: 3000;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    #theme-toggle:hover {
+      background-color: #555;
+      transform: scale(1.1);
+    }
+
+    body.dark #theme-toggle {
+      background: #f5f5f5;
+      color: #121212;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .device-container,
+    .voice-container,
+    .sensor-container,
+    .fan-speed-container {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    /* Softer borders for readability */
+    .device-container,
+    .voice-container,
+    .sensor-container,
+    #emergency-card {
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      /* Light mode default */
+    }
+
+    body.dark .device-container,
+    body.dark .voice-container,
+    body.dark .sensor-container,
+    body.dark #emergency-card {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      /* Dark mode */
+    }
+
+
+    .device-grid {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .device-card {
+      padding: 20px;
+      border-radius: 10px;
+      background-color: #f8f9fa;
+      border: 1px solid #e9ecef;
+      width: 150px;
+      box-sizing: border-box;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .device-card h3 {
+      margin-top: 0;
+      color: #555;
+    }
+
+    .toggle-btn {
+      padding: 10px 15px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+
+    .toggle-btn:hover {
+      background-color: #218838;
+    }
+
+    .voice-btn {
+      background-color: #007bff;
+      padding: 12px 20px;
+      font-size: 18px;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s, transform 0.1s;
+    }
+
+    .voice-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .voice-btn:active {
+      transform: scale(0.98);
+    }
+
+    .status-message {
+      margin-top: 15px;
+      font-size: 16px;
+      min-height: 20px;
+    }
+
+    .sensor-data p {
+      font-size: 18px;
+      margin: 10px 0;
+      color: #555;
+    }
+
+    .icon-container {
+      font-size: 48px;
+      margin-bottom: 10px;
+      transition: color 0.3s, text-shadow 0.3s;
+    }
+
+    .icon-container.active {
+      color: #FFD700;
+      text-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700, 0 0 30px #FFD700;
+    }
+
+    .sensor-status-open {
+      color: red;
+      font-weight: bold;
+    }
+
+    .sensor-status-closed {
+      color: green;
+      font-weight: bold;
+    }
+
+    .flash-background {
+      animation: flash 1s infinite;
+    }
+
+    @keyframes flash {
+      0% {
+        background-color: white;
+      }
+
+      50% {
+        background-color: red;
+      }
+
+      100% {
+        background-color: white;
+      }
+    }
+
+    /* 🔔 Toast Notification Styling */
+    #notification-container {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 2000;
+    }
+
+    .toast {
+      background: #333;
+      color: #fff;
+      padding: 12px 20px;
+      margin-top: 10px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      opacity: 0;
+      transform: translateX(-100%);
+      animation: slideIn 0.5s forwards, fadeOut 0.5s 4.5s forwards;
+    }
+
+    @keyframes slideIn {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        transform: translateX(-100%);
+      }
+    }
+
+    #logout-btn {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    #logout-btn:hover {
+      background: #c0392b;
+      transform: scale(1.05);
+    }
+
+    body.dark #logout-btn {
+      background: #ff6b6b;
+      color: #121212;
+    }
+
+    body.dark #logout-btn:hover {
+      background: #ff4d4d;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 🌙 Theme Toggle Button -->
+  <button id="theme-toggle"><i class="fas fa-moon"></i></button>
+
+  <!-- 🚪 Logout Button -->
+  <form action="/logout" method="post" style="position: fixed; top: 15px; right: 70px; z-index: 3000;">
+    <button type="submit" id="logout-btn">Logout</button>
+  </form>
+
+  <!-- 🔔 Notification Container -->
+  <div id="notification-container"></div>
+
+  <div class="container">
+    <h1>Smart Home Assistant</h1>
+
+    <div class="voice-container">
+      <h3>Voice Control</h3>
+      <button class="voice-btn" id="voice-command-button">
+        <span class="icon">🎤</span> Voice Command
+      </button>
+      <p class="status-message" id="voice-status">Press the button and speak.</p>
+    </div>
+
+    <div class="device-container">
+      <h3>Device Control</h3>
+      <div class="device-grid">
+        <div class="device-card">
+          <h3>Light</h3>
+          <div class="icon-container" id="light-icon">
+            <i class="fas fa-lightbulb"></i>
+          </div>
+          <button class="toggle-btn" onclick="toggleDevice('light')" id="light-btn">
+            {{ 'Turn ON' if not devices['light'] else 'Turn OFF' }}
+          </button>
+        </div>
+        <div class="device-card">
+          <h3>Fan</h3>
+          <div class="icon-container" id="fan-icon">
+            <i class="fas fa-fan"></i>
+          </div>
+          <button class="toggle-btn" onclick="toggleDevice('fan')" id="fan-btn">
+            {{ 'Turn ON' if not devices['fan'] else 'Turn OFF' }}
+          </button>
+
+          <!-- 🌬 Fan Speed Slider -->
+          <div class="mt-3">
+            <input type="range" min="0" max="100" value="0" step="10" id="fanSpeedSlider" disabled />
+            <p>Speed: <span id="fanSpeedValue">0</span>%</p>
+          </div>
+        </div>
+
+        <div class="device-card">
+          <h3>AC</h3>
+          <div class="icon-container" id="ac-icon">
+            <i class="fas fa-snowflake"></i>
+          </div>
+          <button class="toggle-btn" onclick="toggleDevice('ac')" id="ac-btn">
+            {{ 'Turn ON' if not devices['ac'] else 'Turn OFF' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sensor-container">
+      <h3>Sensor Data</h3>
+      <div class="sensor-data">
+        <p><span class="icon">🌡️</span> Temperature: <span id="temperature">{{ sensor_data['temperature'] }}</span> °C
+        </p>
+        <p><span class="icon">💧</span> Humidity: <span id="humidity">{{ sensor_data['humidity'] }}</span> %</p>
+      </div>
+    </div>
+
+    <div class="sensor-container">
+      <h3>Door & Window Status</h3>
+      <div class="sensor-data">
+        <p><span class="icon">🚪</span> Main Door: <span id="main-door-status">Checking...</span></p>
+        <p><span class="icon">🪟</span> Window: <span id="window-status">Checking...</span></p>
+      </div>
+    </div>
+
+    <!-- 🚨 Emergency -->
+    <div class="sensor-container" id="emergency-card">
+      <h3>🚨 Emergency Status</h3>
+      <p id="emergency-status">Checking...</p>
+    </div>
+  </div>
+
+  <script>
+    let emergencyActive = false;
+
+    // 🌬 Fan Speed Control Logic
+    const slider = document.getElementById("fanSpeedSlider");
+    const output = document.getElementById("fanSpeedValue");
+    const fanIcon = document.getElementById("fan-icon");
+
+    // 🌙 Theme Toggle Logic
+    const themeToggle = document.getElementById("theme-toggle");
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      const icon = themeToggle.querySelector("i");
+      if (document.body.classList.contains("dark")) {
+        icon.classList.replace("fa-moon", "fa-sun");
+      } else {
+        icon.classList.replace("fa-sun", "fa-moon");
+      }
+
+      const card = document.getElementById('emergency-card');
+      if (!emergencyActive) {
+        if (document.body.classList.contains("dark")) {
+          card.style.backgroundColor = "#1e1e1e";
+          card.style.color = "#f5f5f5";
+        } else {
+          card.style.backgroundColor = "white";
+          card.style.color = "black";
+        }
+      }
+    });
+
+    // 🔔 Notification
+    function showNotification(message) {
+      const container = document.getElementById("notification-container");
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.innerText = message;
+      container.appendChild(toast);
+      setTimeout(() => { toast.remove(); }, 5000);
+    }
+
+    // Toggle device state
+    function toggleDevice(device) {
+      if (emergencyActive) {
+        showNotification("🚨 Emergency active! Device control disabled.");
+        return;
+      }
+      fetch('/toggle_device', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device: device })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === "success") {
+            updateUI(device, data.state);
+            showNotification(`${device.toUpperCase()} turned ${data.state}`);
+          }
+        });
+    }
+
+    // Automation
+    function runAutomation() {
+      if (emergencyActive) {
+        showNotification("🚨 Emergency active! Automation disabled.");
+        return;
+      }
+      fetch('/run_automation', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          updateUI('light', data.devices.light ? 'ON' : 'OFF');
+          updateUI('fan', data.devices.fan ? 'ON' : 'OFF');
+          updateUI('ac', data.devices.ac ? 'ON' : 'OFF');
+          showNotification("Automation executed.");
+        });
+    }
+
+    // Update sensors
+    function updateSensorData() {
+      fetch('/get_sensor_data')
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('temperature').innerText = data.temperature;
+          document.getElementById('humidity').innerText = data.humidity;
+          runAutomation();
+        });
+    }
+    setInterval(updateSensorData, 5000);
+
+    // Door sensors
+    function updateDoorSensors() {
+      fetch('/get_door_sensors')
+        .then(res => res.json())
+        .then(data => {
+          const mainDoorStatus = document.getElementById('main-door-status');
+          const windowStatus = document.getElementById('window-status');
+
+          if (data.main_door_open) {
+            mainDoorStatus.innerText = 'OPEN';
+            mainDoorStatus.className = 'sensor-status-open';
+            showNotification("🚪 Main Door OPEN");
+          } else {
+            mainDoorStatus.innerText = 'CLOSED';
+            mainDoorStatus.className = 'sensor-status-closed';
+          }
+
+          if (data.window_open) {
+            windowStatus.innerText = 'OPEN';
+            windowStatus.className = 'sensor-status-open';
+            showNotification("🪟 Window OPEN");
+          } else {
+            windowStatus.innerText = 'CLOSED';
+            windowStatus.className = 'sensor-status-closed';
+          }
+        });
+    }
+    setInterval(updateDoorSensors, 5000);
+
+    // Emergency
+    function updateEmergencyStatus() {
+      fetch('/get_emergency_status')
+        .then(res => res.json())
+        .then(data => {
+          const card = document.getElementById('emergency-card');
+          const status = document.getElementById('emergency-status');
+          status.innerText = data.message;
+          emergencyActive = data.status;
+
+          if (data.status) {
+            document.body.classList.add("flash-background");
+            card.style.backgroundColor = "red";
+            card.style.color = "white";
+            let utterance = new SpeechSynthesisUtterance("Alerting Fire Department!");
+            window.speechSynthesis.speak(utterance);
+
+            updateUI('light', 'OFF');
+            updateUI('fan', 'OFF');
+            updateUI('ac', 'OFF');
+            showNotification("🚨 Emergency detected!");
+
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+              btn.disabled = true;
+              btn.style.opacity = "0.5";
+              btn.style.cursor = "not-allowed";
+            });
+
+            const voiceBtn = document.getElementById('voice-command-button');
+            voiceBtn.disabled = true;
+            voiceBtn.style.opacity = "0.5";
+            voiceBtn.style.cursor = "not-allowed";
+            document.getElementById('voice-status').innerText = "🚨 Disabled due to emergency";
+          } else {
+            document.body.classList.remove("flash-background");
+
+            if (document.body.classList.contains("dark")) {
+              card.style.backgroundColor = "#1e1e1e";
+              card.style.color = "#f5f5f5";
+            } else {
+              card.style.backgroundColor = "white";
+              card.style.color = "black";
+            }
+
+            showNotification("✅ Emergency cleared");
+
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+              btn.disabled = false;
+              btn.style.opacity = "1";
+              btn.style.cursor = "pointer";
+            });
+
+            const voiceBtn = document.getElementById('voice-command-button');
+            voiceBtn.disabled = false;
+            voiceBtn.style.opacity = "1";
+            voiceBtn.style.cursor = "pointer";
+            document.getElementById('voice-status').innerText = "Press the button and speak.";
+          }
+        })
+        .catch(err => {
+          console.error("Error fetching emergency status:", err);
+        });
+    }
+    setInterval(updateEmergencyStatus, 10000);
+
+
+    function updateFanGlow(speed) {
+      // Glow intensity based on speed
+      fanIcon.style.textShadow =
+        speed > 0
+          ? `0 0 ${speed / 3}px rgba(0, 200, 255, 0.9)`
+          : "none";
+    }
+
+    let lastFanSpeed = 0; // 🔹 remember last fan speed
+
+    function updateUI(device, state) {
+      const button = document.getElementById(device + '-btn');
+      const iconContainer = document.getElementById(device + '-icon');
+      button.innerText = state === "ON" ? "Turn OFF" : "Turn ON";
+
+      if (state === "ON") {
+        iconContainer.classList.add('active');
+        if (device === "fan") {
+          slider.disabled = false;
+          slider.value = lastFanSpeed > 0 ? lastFanSpeed : 50; // restore previous speed or default 50
+          output.textContent = slider.value;
+          fanIcon.style.textShadow = slider.value > 0
+            ? `0 0 ${slider.value / 4}px rgba(0, 200, 255, 0.9)`
+            : "none";
+        }
+      } else {
+        iconContainer.classList.remove('active');
+        if (device === "fan") {
+          lastFanSpeed = slider.value; // save before turning off
+          slider.disabled = true;
+          slider.value = 0;
+          output.textContent = 0;
+          fanIcon.style.textShadow = "none";
+        }
+      }
+    }
+
+    // 🔹 slider snap handler
+    slider.onchange = function () {
+      let value = parseInt(this.value);
+
+      // Snap to nearest allowed value
+      const allowed = [0, 30, 50, 70, 100];
+      let nearest = allowed.reduce((a, b) =>
+        Math.abs(b - value) < Math.abs(a - value) ? b : a
+      );
+
+      this.value = nearest;
+      output.textContent = nearest;
+      lastFanSpeed = nearest;
+
+      // Only send if fan is ON
+      if (document.getElementById("fan-btn").innerText === "Turn OFF") {
+        fetch(`/set_fan_speed?value=${nearest}`);
+        updateFanGlow(nearest);
+      } else {
+        this.value = 0;
+        output.textContent = 0;
+        updateFanGlow(0);
+        alert("Turn ON the fan before adjusting speed.");
+      }
+    };
+
+
+
+    // Voice commands
+    document.getElementById('voice-command-button').addEventListener('click', function () {
+      const statusElement = document.getElementById('voice-status');
+      statusElement.textContent = "Listening...";
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = "en-US";
+      recognition.start();
+
+      recognition.onresult = function (event) {
+        const command = event.results[0][0].transcript.toLowerCase();
+        statusElement.textContent = `You said: "${command}"`;
+
+        fetch('/voice_command', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ command: command })
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.status === "success") {
+              statusElement.textContent = data.message;
+              updateUI(data.device, data.state);
+              showNotification(data.message);
+            } else {
+              statusElement.textContent = data.message;
+              showNotification("❌ " + data.message);
+            }
+          });
+      };
+
+      recognition.onerror = function () {
+        statusElement.textContent = "Voice recognition failed.";
+        showNotification("⚠️ Voice recognition failed");
+      };
+    });
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      updateUI('light', "{{ 'ON' if devices['light'] else 'OFF' }}");
+      updateUI('fan', "{{ 'ON' if devices['fan'] else 'OFF' }}");
+      updateUI('ac', "{{ 'ON' if devices['ac'] else 'OFF' }}");
+      updateDoorSensors();
+
+      const card = document.getElementById('emergency-card');
+      if (document.body.classList.contains("dark")) {
+        card.style.backgroundColor = "#1e1e1e";
+        card.style.color = "#f5f5f5";
+      } else {
+        card.style.backgroundColor = "white";
+        card.style.color = "black";
+      }
+    });
+  </script>
+</body>
+
+</html>
