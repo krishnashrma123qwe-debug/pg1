@@ -7,44 +7,53 @@
   <title>Smart Home Assistant</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background-color: #f0f2f5;
-      color: #333;
-      margin: 0;
-      padding: 0;
-      transition: background-color 0.3s, color 0.3s;
-    }
-
-    h1 {
+   /* Default = light mode */
+body {
+  font-family: 'Poppins', sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  color: black; /* ✅ text readable in light mode */
+  background: radial-gradient(circle at top left, #e0eafc, #cfdef3);
+  transition: background-color 0.3s, color 0.3s;
+}
+h1 {
       margin: 20px 0;
-      color: #2c3e50;
+      font-size: 2rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color:black;
+    }
+    h3 {
+      font-weight: 500;
+      margin-bottom: 15px;
+      color: black;
     }
 
-    /* 🌙 Dark Theme */
-    body.dark {
-      background-color: #121212;
-      color: #f5f5f5;
-    }
-
-    body.dark h1,
+    
+    /* Dark Mode */
+body.dark {
+  background: radial-gradient(circle at top left, #0f2027, #203a43, #2c5364);
+  color: #f5f5f5;
+}
+body.dark h1,
     body.dark h3,
     body.dark p,
     body.dark span {
-      color: #ffffff;
+      color: #f0f0f0;
     }
 
     body.dark .device-container,
     body.dark .voice-container,
     body.dark .sensor-container {
-      background: #1e1e1e;
-      border: 1px solid #333;
+     background: rgba(15, 32, 39, 0.85); /* ✅ matches dark gradient */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f5f5f5;
     }
 
     body.dark .device-card {
-      background-color: #2a2a2a;
-      border: 1px solid #444;
+      background: rgba(32, 58, 67, 0.85); /* ✅ blend with gradient instead of flat black */
+  border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     body.dark .toggle-btn {
@@ -64,17 +73,17 @@
     }
 
     body.dark #emergency-card {
-      background: #1e1e1e;
+      background:rgba(32, 58, 67, 0.85);
       color: #f5f5f5;
       border: 1px solid #333;
     }
 
-    /* 🌓 Theme Toggle Button */
+    /* 🌙 Theme Toggle Button */
     #theme-toggle {
       position: fixed;
       top: 15px;
       right: 20px;
-      background: #333;
+      background: rgba(255, 255, 255, 0.15);
       color: #fff;
       border: none;
       padding: 10px 15px;
@@ -82,19 +91,20 @@
       cursor: pointer;
       font-size: 18px;
       z-index: 3000;
-      transition: background-color 0.3s, transform 0.2s;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
     }
 
+    
     #theme-toggle:hover {
-      background-color: #555;
+      background-color: rgba(255, 255, 255, 0.3);
       transform: scale(1.1);
     }
-
-    body.dark #theme-toggle {
-      background: #f5f5f5;
-      color: #121212;
+   body.dark #theme-toggle {
+      background: rgba(0, 0, 0, 0.2);
+      color: #fff;
     }
-
     .container {
       max-width: 800px;
       margin: auto;
@@ -122,13 +132,14 @@
       /* Light mode default */
     }
 
-    body.dark .device-container,
-    body.dark .voice-container,
-    body.dark .sensor-container,
-    body.dark #emergency-card {
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      /* Dark mode */
-    }
+   body.dark .device-container,
+body.dark .voice-container,
+body.dark .sensor-container,
+body.dark #emergency-card {
+  background: rgba(32, 58, 67, 0.85);  /* bluish glass tone matching gradient */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f5f5f5;  /* keep text readable */
+}
 
 
     .device-grid {
@@ -273,19 +284,21 @@
       }
     }
 
+    /* 🚪 Logout Button */
     #logout-btn {
-      background: #e74c3c;
+      background: #ff4b5c;
       color: white;
       border: none;
       padding: 10px 15px;
-      border-radius: 8px;
+      border-radius: 12px;
       cursor: pointer;
       font-size: 14px;
-      transition: background-color 0.3s, transform 0.2s;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(255, 75, 92, 0.5);
     }
-
-    #logout-btn:hover {
-      background: #c0392b;
+#logout-btn:hover {
+      background: #e63946;
       transform: scale(1.05);
     }
 
@@ -297,12 +310,186 @@
     body.dark #logout-btn:hover {
       background: #ff4d4d;
     }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    /* 🪟 Glassmorphism Cards */
+    .device-container,
+    .voice-container,
+    .sensor-container,
+    #emergency-card {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      padding: 20px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      color : black; 
+    }
+
+    .device-container:hover,
+    .voice-container:hover,
+    .sensor-container:hover,
+    #emergency-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    /* Device Grid */
+    .device-grid {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .device-card {
+      padding: 20px;
+      border-radius: 16px;
+      width: 180px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .device-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    }
+
+    .device-card h3 {
+      margin-top: 0;
+    }
+
+    /* Toggle Buttons */
+    .toggle-btn {
+      padding: 10px 15px;
+      background: linear-gradient(135deg, #28a745, #4cd964);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(72, 239, 128, 0.4);
+    }
+
+    .toggle-btn:hover {
+      background: linear-gradient(135deg, #218838, #2ecc71);
+      transform: scale(1.05);
+    }
+
+    /* 🎤 Voice Button */
+    .voice-btn {
+      background: linear-gradient(135deg, #007bff, #00c6ff);
+      padding: 12px 20px;
+      font-size: 18px;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0, 118, 255, 0.5);
+      transition: all 0.3s ease;
+    }
+
+    .voice-btn:hover {
+      background: linear-gradient(135deg, #0056b3, #0096ff);
+      transform: scale(1.05);
+    }
+
+    .voice-btn:active {
+      transform: scale(0.97);
+    }
+
+    .status-message {
+      margin-top: 15px;
+      font-size: 16px;
+      min-height: 20px;
+    
+    }
+
+    /* 🌡 Sensor Data */
+    .sensor-data p {
+      font-size: 17px;
+      margin: 10px 0;
+     
+    }
+
+    /* 💡 Device Icons */
+    .icon-container {
+      font-size: 48px;
+      margin-bottom: 10px;
+      transition: color 0.3s, text-shadow 0.3s;
+      
+    }
+
+    .icon-container.active {
+      color: #FFD700;
+      text-shadow: 0 0 15px #FFD700, 0 0 25px #FFD700, 0 0 35px #FFD700;
+    }
+
+    /* 🚨 Emergency */
+    #emergency-card {
+      border: 2px solid rgba(255, 0, 0, 0.6);
+    }
+
+    /* 🔔 Toast Notification */
+    #notification-container {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 2000;
+    }
+
+    .toast {
+      background: rgba(0, 0, 0, 0.85);
+      color: #fff;
+      padding: 12px 20px;
+      margin-top: 10px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      transform: translateX(-100%);
+      animation: slideIn 0.5s forwards, fadeOut 0.5s 4.5s forwards;
+    }
+
+    @keyframes slideIn {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        transform: translateX(-100%);
+      }
+    }
+     /* ✅ Add this at the bottom of the style block */
+    body:not(.dark) h1,
+    body:not(.dark) h3,
+    body:not(.dark) p,
+    body:not(.dark) span,
+    body:not(.dark) .status-message,
+    body:not(.dark) .sensor-data p,
+    body:not(.dark) .icon-container,
+    body:not(.dark) .device-card h3 {
+      color: black !important;
+    }
   </style>
 </head>
 
 <body>
-
-  <!-- 🌙 Theme Toggle Button -->
+<!-- 🌙 Theme Toggle Button -->
   <button id="theme-toggle"><i class="fas fa-moon"></i></button>
 
   <!-- 🚪 Logout Button -->
@@ -316,6 +503,7 @@
   <div class="container">
     <h1>Smart Home Assistant</h1>
 
+    <!-- 🎤 Voice -->
     <div class="voice-container">
       <h3>Voice Control</h3>
       <button class="voice-btn" id="voice-command-button">
@@ -323,7 +511,9 @@
       </button>
       <p class="status-message" id="voice-status">Press the button and speak.</p>
     </div>
+    <div class="device-container">
 
+       <!-- 💡 Devices -->
     <div class="device-container">
       <h3>Device Control</h3>
       <div class="device-grid">
@@ -336,6 +526,7 @@
             {{ 'Turn ON' if not devices['light'] else 'Turn OFF' }}
           </button>
         </div>
+
         <div class="device-card">
           <h3>Fan</h3>
           <div class="icon-container" id="fan-icon">
@@ -345,7 +536,6 @@
             {{ 'Turn ON' if not devices['fan'] else 'Turn OFF' }}
           </button>
 
-          <!-- 🌬 Fan Speed Slider -->
           <div class="mt-3">
             <input type="range" min="0" max="100" value="0" step="10" id="fanSpeedSlider" disabled />
             <p>Speed: <span id="fanSpeedValue">0</span>%</p>
@@ -364,11 +554,11 @@
       </div>
     </div>
 
+    <!-- 🌡 Sensors -->
     <div class="sensor-container">
       <h3>Sensor Data</h3>
       <div class="sensor-data">
-        <p><span class="icon">🌡️</span> Temperature: <span id="temperature">{{ sensor_data['temperature'] }}</span> °C
-        </p>
+        <p><span class="icon">🌡️</span> Temperature: <span id="temperature">{{ sensor_data['temperature'] }}</span> °C</p>
         <p><span class="icon">💧</span> Humidity: <span id="humidity">{{ sensor_data['humidity'] }}</span> %</p>
       </div>
     </div>
@@ -381,13 +571,12 @@
       </div>
     </div>
 
-    <!-- 🚨 Emergency -->
+     <!-- 🚨 Emergency -->
     <div class="sensor-container" id="emergency-card">
       <h3>🚨 Emergency Status</h3>
       <p id="emergency-status">Checking...</p>
     </div>
   </div>
-
   <script>
     let emergencyActive = false;
 
